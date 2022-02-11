@@ -23,7 +23,7 @@ const generateRtcToken = async function (req, res) {
     role,
     privilegeExpiredTs
   );
-  res.status(200).json({ key: key });
+  res.status(200).json({ token: key, channelName: channelName });
 };
 
 module.exports = generateRtcToken;
