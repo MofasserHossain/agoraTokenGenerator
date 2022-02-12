@@ -4,26 +4,36 @@ const appCertificate = process.env.AGORA_APP_CERTIFICATE;
 
 // token expire time, hardcode to 3600 seconds = 1 hour
 const expirationTimeInSeconds = 3600;
-const role = RtcRole.PUBLISHER;
 
 const generateRtcToken = async function (req, res) {
+  const { channelName, uid, role } = req.query;
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
-  const channelName = req.query.channelName;
+
   // use 0 if uid is not specified
-  const uid = req.query.uid;
-  if (!channelName || !uid) {
-    return res.status(400).json({ error: 'channel name and uid is required' });
+  if (!channelName) {
+    return res
+      .status(400)
+      .json({ status: 'error', message: 'channel name and uid is required' });
   }
+
+  let userRule;
+  if (role === 'publisher') {
+    userRule = RtcRole.PUBLISHER;
+  } else {
+    userRule = RtcRole.SUBSCRIBER;
+  }
+  const newUid = !!uid ? uid : Math.floor(Math.random() * 100000);
+
   const key = await RtcTokenBuilder.buildTokenWithUid(
     appID,
     appCertificate,
     channelName,
-    uid,
-    role,
+    newUid,
+    userRule,
     privilegeExpiredTs
   );
-  res.status(200).json({ token: key, channelName: channelName });
+  res.status(200).json({ token: key, channelName: channelName, uid: newUid });
 };
 
 module.exports = generateRtcToken;

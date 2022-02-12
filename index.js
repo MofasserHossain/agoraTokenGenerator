@@ -10,6 +10,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// publisher
 app.get('/rtcToken', generateRtcToken);
 
 const port = process.env.PORT || 5000;
